@@ -1,5 +1,7 @@
 package com.sky.service.impl;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
@@ -11,16 +13,16 @@ import com.sky.exception.AccountLockedException;
 import com.sky.exception.AccountNotFoundException;
 import com.sky.exception.PasswordErrorException;
 import com.sky.mapper.EmployeeMapper;
+import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.springframework.beans.BeanUtils.copyProperties;
 
@@ -87,5 +89,49 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     }
+
+    @Override
+    public PageResult lists(int pageNum, int pageNumSize, String name) {
+        PageHelper.startPage(pageNum, pageNumSize);
+        List<Employee> selectlist = employeeMapper.selectlist(name);
+        Page<Employee> p=(Page<Employee>)selectlist;
+        PageResult pageResult = new PageResult();
+        pageResult.setTotal(p.getTotal());
+        pageResult.setRecords(p.getResult());
+        return pageResult;
+    }
+
+    @Override
+    public void updateStatus(Integer status, Long id) {
+        Employee employee =new Employee();
+        employee.setStatus(status);
+        employee.setId(id);
+        employeeMapper.update(employee);
+    }
+
+    @Override
+    public void updateEmployee(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO,employee);
+        employeeMapper.update(employee);
+
+    }
+
+    @Override
+    public EmployeeDTO selectone(Long id) {
+        Employee employee =employeeMapper.selectone(id);
+        EmployeeDTO employeeDTO = new EmployeeDTO();
+        BeanUtils.copyProperties(employee,employeeDTO);
+        return employeeDTO;
+    }
+
+    /*
+    @Override
+    public List<Employee> list() {
+      List<Employee> list=  employeeMapper.selectlist();
+        return list ;
+    }
+
+     */
 
 }
